@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace AdventofCode
 {
@@ -80,92 +81,149 @@ namespace AdventofCode
 
         static void Main(string[] args)
         {
-             StreamReader reader = new StreamReader("C:\\Users\\46760\\source\\repos\\AdventofCode\\Input.txt");
-             string[] lines = reader.ReadToEnd().Split();
-             var numbers = lines.Where(
-                 line => !string.IsNullOrEmpty(line)
-               ).Select(
-                 line => line.Trim()
-               ).Select(
-                 line => int.Parse(line)
-               ).ToList();
+             //StreamReader reader = new StreamReader("C:\\Users\\46760\\source\\repos\\AdventofCode\\Input.txt");
+             //string[] lines = reader.ReadToEnd().Split();
+             //var numbers = lines.Where(
+             //    line => !string.IsNullOrEmpty(line)
+             //  ).Select(
+             //    line => line.Trim()
+             //  ).Select(
+             //    line => int.Parse(line)
+               //).ToList();
             
 
-            string[] lines1 = File.ReadAllLines("C:\\Users\\46760\\source\\repos\\AdventofCode\\TextFile1.txt");
+            //string[] lines1 = File.ReadAllLines("C:\\Users\\46760\\source\\repos\\AdventofCode\\TextFile1.txt");
 
-            // Process each line to get groups of numbers
-            var numberGroups = lines1
-                .Select(line => line
-                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(int.Parse)                               
-                    .ToArray())                                      
-                .ToArray();
+            //// Process each line to get groups of numbers
+            //var numberGroups = lines1
+            //    .Select(line => line
+            //        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            //        .Select(int.Parse)                               
+            //        .ToArray())                                      
+            //    .ToArray();
 
-            int counter = 0;
+            StreamReader reader1 = new StreamReader("C:\\Users\\micha\\source\\repos\\AdventofCode\\TextFile2.txt");
+            string lines2 = reader1.ReadToEnd();
+
+            string pattern = @"mul\((\d{1,3}),(\d{1,3})\)";
+            Regex rg = new Regex(pattern);
+            string pattern2 = @"do\(\)|don't\(\)|mul\((\d{1,3}),(\d{1,3})\)";
+            Regex rg2 = new Regex(pattern2);
+            MatchCollection test2 = rg2.Matches(lines2);
 
 
-            for (int j = 0; j < numberGroups.Length; j++)
+            int answerb = 0;
+            MatchCollection test = rg.Matches(lines2);
+            for(int i = 0; i < test.Count; i++)
             {
-                //bool isIncreasing = true;
+                Console.WriteLine(test[i].Value);
 
-                //bool isSafe = true;
-
-                List<int> ints = new List<int>();
-                ints.AddRange(numberGroups[j]);
-
-                int[] nums = diffChecker(ints);
-                Console.WriteLine(nums[0] + " " + nums[1]);
-                if (nums[0] == -10 && nums[1] == -10)
-                {
-                    counter++;
-                    continue;
-                }
-                ints.RemoveAt(nums[1]);
-                nums = diffChecker(ints);
-                if (nums[0] == -10 && nums[1] == -10)
-                {
-                    counter++;
-                    continue;
-                }
-                
-
-                //for (int i = 1; i < numberGroups[j].Length; i++)
-                //{
-
-                    
-                //    int diff = Math.Abs(numberGroups[j][i] - numberGroups[j][i - 1]);
-                //    if (i ==1)
-                //    {
-                //        isIncreasing = numberGroups[j][i] > numberGroups[j][i - 1];
-                //    }
-
-                //    // Rule 1: 
-                //    if (diff < 1 || diff > 3)
-                //    {
-
-                        
-                //        isSafe = false;
-                //        break; 
-                //    }
-
-                //    // Determine the direction
-                //    bool currentIsIncreasing = numberGroups[j][i] > numberGroups[j][i - 1];
-                    
-                //    // Rule 2: Check if the direction has switched
-                //    if (currentIsIncreasing != isIncreasing)
-                //    {
-  
-                //        isSafe = false;
-                       
-                //        break;
-                //    }
-                   
-                //}
-                //if (isSafe)
-                //    counter++;
             }
-            Console.WriteLine(counter);
- 
+
+            bool skip = false;
+            foreach(Match match in test2)
+            {
+                if (match.Value == "do()")
+                {
+                    skip = false;
+                }
+                else if(match.Value == "don't()")
+                {
+                    skip = true;
+                }
+
+                else if(match.Value.StartsWith("mul") && skip == false)
+                {
+
+                    // Extract the numbers from capture groups
+                    int num1 = int.Parse(match.Groups[1].Value);
+                    int num2 = int.Parse(match.Groups[2].Value);
+
+                    // Multiply the numbers
+                    int result = num1 * num2;
+                    answerb += result;
+                }
+            }
+            
+            int answer = 0;
+            foreach (Match match in test)
+            {
+                // Extract the numbers from capture groups
+                int num1 = int.Parse(match.Groups[1].Value);
+                int num2 = int.Parse(match.Groups[2].Value);
+
+                // Multiply the numbers
+                int result = num1 * num2;
+
+                answer += result;
+
+            }
+            Console.WriteLine(answer);
+            Console.WriteLine(answerb);
+
+
+            //for (int j = 0; j < numberGroups.Length; j++)
+            //{
+            //    //bool isIncreasing = true;
+
+            //    //bool isSafe = true;
+
+            //    List<int> ints = new List<int>();
+            //    ints.AddRange(numberGroups[j]);
+
+            //    int[] nums = diffChecker(ints);
+            //    Console.WriteLine(nums[0] + " " + nums[1]);
+            //    if (nums[0] == -10 && nums[1] == -10)
+            //    {
+            //        counter++;
+            //        continue;
+            //    }
+            //    ints.RemoveAt(nums[1]);
+            //    nums = diffChecker(ints);
+            //    if (nums[0] == -10 && nums[1] == -10)
+            //    {
+            //        counter++;
+            //        continue;
+            //    }
+
+
+            //    //for (int i = 1; i < numberGroups[j].Length; i++)
+            //    //{
+
+
+            //    //    int diff = Math.Abs(numberGroups[j][i] - numberGroups[j][i - 1]);
+            //    //    if (i ==1)
+            //    //    {
+            //    //        isIncreasing = numberGroups[j][i] > numberGroups[j][i - 1];
+            //    //    }
+
+            //    //    // Rule 1: 
+            //    //    if (diff < 1 || diff > 3)
+            //    //    {
+
+
+            //    //        isSafe = false;
+            //    //        break; 
+            //    //    }
+
+            //    //    // Determine the direction
+            //    //    bool currentIsIncreasing = numberGroups[j][i] > numberGroups[j][i - 1];
+
+            //    //    // Rule 2: Check if the direction has switched
+            //    //    if (currentIsIncreasing != isIncreasing)
+            //    //    {
+
+            //    //        isSafe = false;
+
+            //    //        break;
+            //    //    }
+
+            //    //}
+            //    //if (isSafe)
+            //    //    counter++;
+            //}
+            //Console.WriteLine(counter);
+
             // List<int> List1 = new List<int>();
             // List<int> List2 = new List<int>();
             // for(int i = 0; i <= numbers.Count-1; i = i+2)
@@ -174,16 +232,16 @@ namespace AdventofCode
             //     List2.Add(numbers[i + 1]);
 
             // }
-             
+
             // List1.Sort();
             // List2.Sort();
             // int answera = differenceFinder(List1, List2);
             // int answerb = DuplicateFinder(List1, List2);
-           
+
 
 
             //Console.WriteLine(answerb);
-            
+
         }
     }
 }
