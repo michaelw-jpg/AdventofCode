@@ -1,247 +1,160 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace AdventofCode
 {
     internal class Program
     {
-        
-        static int DuplicateFinder(List<int> List1, List<int>List2)
+       
+            
+        static List<int> Swapper(List<int> wrongupdates, List<List<int>>rules)
         {
-            int answerb = 0;
-            Dictionary<int, int> counter = new Dictionary<int, int>();
-            foreach (int num in List2) //checks for multiple instances of same numbers if it finds 1 ++ else add a new instance of dictionary
+            for (int j = 0; j < wrongupdates.Count; j++) // Every int in the row.
             {
-                if (counter.ContainsKey(num))
-                    counter[num]++;
-                else
-                    counter[num] = 1;
-            }
-            foreach (int num in List1) //checks against list 1 if number exists in list1 add to answer * number of times found in list2
-            {
-                if (counter.ContainsKey(num))
-                {
-                    answerb += num * counter[num];
-                }
-            }
-            return answerb;
+                // X | Y
 
+                for (int k = 0; k < rules.Count; k++) // Every rule
+                {
+                    // continue break; Rule broken
+                    // X
+                    if (rules[k][0] == wrongupdates[j])
+                        if (wrongupdates.Contains(rules[k][1])) // If the Y value exists in the row.
+                        {
+                            int xIndex = wrongupdates.IndexOf(rules[k][0]);
+                            int yIndex = wrongupdates.IndexOf(rules[k][1]);
+
+                            // Ensure Y is before X in the row, which violates the rule.
+                            if (yIndex > xIndex)
+                            {
+                                // Perform the swap.
+                                int temp = wrongupdates[yIndex];  // Save the value at Y's index.
+                                wrongupdates[yIndex] = wrongupdates[xIndex];  // Move X's value to Y's index.
+                                wrongupdates[xIndex] = temp;  // Place Y's value in X's index.
+
+                                return wrongupdates; // Return the updated list.
+                            }
+                        }
+                        
+                                                    // Y
+                    if (rules[k][1] == wrongupdates[j])
+                        if (wrongupdates.Contains(rules[k][0])) // If the X value exists in the row.
+                        {
+                            int xIndex = wrongupdates.IndexOf(rules[k][0]);
+                            int yIndex = wrongupdates.IndexOf(rules[k][1]);
+
+                            // Ensure Y is before X in the row, which violates the rule.
+                            if (yIndex < xIndex)
+                            {
+                                // Perform the swap.
+                                int temp = wrongupdates[yIndex];  // Save the value at Y's index.
+                                wrongupdates[yIndex] = wrongupdates[xIndex];  // Move X's value to Y's index.
+                                wrongupdates[xIndex] = temp;  // Place Y's value in X's index.
+
+                                return wrongupdates; // Return the updated list.
+                            }
+                        }
+
+                }
+
+            }
+            return wrongupdates;
         }
-        static int differenceFinder(List<int> List1, List<int>List2)
-        {
-
-            int answera = 0;
-
-            for (int i = 0; i < List1.Count; i++)
-            {
-                int b = List1[i] - List2[i];
-                b = Math.Abs(b);
-                answera += b;
-            }
-            return answera;
-        }
-
-        static int[] diffChecker(List<int> numbers) // returns number that needs to be removed and at what index otherwise -10 and -10
-        {
-            bool isIncreasing = true;
-            for (int i = 1; i < numbers.Count; i++)
-            {
-                
-                if (i == 1)
-                {
-                    isIncreasing = numbers[i] > numbers[i - 1];
-                }
-
-                int diff = Math.Abs(numbers[i] - numbers[i - 1]);
-
-                if (diff < 1 || diff > 3)
-                {
-
-                    //part 2 
-                    int[] ans2 = { numbers[i-1], i -1};
-                    return ans2;
-                }
-
-                bool currentIsIncreasing = numbers[i] > numbers[i - 1];
-
-                // Rule 2: Check if the direction has switched
-                if (currentIsIncreasing != isIncreasing)
-                {
-
-
-                    int[] ans3 = { numbers[i-1], i-1 };
-                    return ans3;
-                }
-
-            }
-
-            int[] ans = { -10, -10 };
-            return ans;
-        }
-
         static void Main(string[] args)
         {
-             //StreamReader reader = new StreamReader("C:\\Users\\46760\\source\\repos\\AdventofCode\\Input.txt");
-             //string[] lines = reader.ReadToEnd().Split();
-             //var numbers = lines.Where(
-             //    line => !string.IsNullOrEmpty(line)
-             //  ).Select(
-             //    line => line.Trim()
-             //  ).Select(
-             //    line => int.Parse(line)
-               //).ToList();
-            
-
-            //string[] lines1 = File.ReadAllLines("C:\\Users\\46760\\source\\repos\\AdventofCode\\TextFile1.txt");
-
-            //// Process each line to get groups of numbers
-            //var numberGroups = lines1
-            //    .Select(line => line
-            //        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            //        .Select(int.Parse)                               
-            //        .ToArray())                                      
-            //    .ToArray();
-
-            StreamReader reader1 = new StreamReader("C:\\Users\\micha\\source\\repos\\AdventofCode\\TextFile2.txt");
-            string lines2 = reader1.ReadToEnd();
-
-            string pattern = @"mul\((\d{1,3}),(\d{1,3})\)";
-            Regex rg = new Regex(pattern);
-            string pattern2 = @"do\(\)|don't\(\)|mul\((\d{1,3}),(\d{1,3})\)";
-            Regex rg2 = new Regex(pattern2);
-            MatchCollection test2 = rg2.Matches(lines2);
 
 
-            int answerb = 0;
-            MatchCollection test = rg.Matches(lines2);
-            for(int i = 0; i < test.Count; i++)
+            RulesTextString textRules = new();
+            UpdatesTextString textUpdates = new();
+
+            List<List<int>> updates = textUpdates.GetUpdateList();
+            List<List<int>> rules = textRules.GetRuleList();
+            List<List<int>> wrongupdates = new List<List<int>>();
+
+            int totalSum = 0;
+
+            for (int i = 0; i < updates.Count; i++) // Every Row in updates
             {
-                Console.WriteLine(test[i].Value);
+                bool areWeClear = true;
 
-            }
-
-            bool skip = false;
-            foreach(Match match in test2)
-            {
-                if (match.Value == "do()")
+                for (int j = 0; j < updates[i].Count; j++) // Every int in the row.
                 {
-                    skip = false;
+                    // X | Y
+
+                    for (int k = 0; k < rules.Count; k++) // Every rule
+                    {
+                        // continue break; Rule broken
+                        // X
+                        if (rules[k][0] == updates[i][j])
+                            if (updates[i].Contains(rules[k][1])) // If the Y value exists in the row.
+                                if (updates[i].IndexOf(rules[k][0]) > updates[i].IndexOf(rules[k][1])) // is X-index > Y-index ?
+                                    areWeClear = false; // continue break; Rule broken
+                                                        // Y
+                        if (rules[k][1] == updates[i][j])
+                            if (updates[i].Contains(rules[k][0])) // If the X value exists in the row.
+                                if (updates[i].IndexOf(rules[k][1]) < updates[i].IndexOf(rules[k][0])) // is Y-index < X-index ?
+                                    areWeClear = false; // continue break; Rule broken
+
+                    }
+
                 }
-                else if(match.Value == "don't()")
+                if (areWeClear)
                 {
-                    skip = true;
+                    int middlePageNumber = updates[i][(updates[i].Count - 1) / 2];
+                    totalSum += middlePageNumber;
                 }
-
-                else if(match.Value.StartsWith("mul") && skip == false)
+                else
                 {
-
-                    // Extract the numbers from capture groups
-                    int num1 = int.Parse(match.Groups[1].Value);
-                    int num2 = int.Parse(match.Groups[2].Value);
-
-                    // Multiply the numbers
-                    int result = num1 * num2;
-                    answerb += result;
+                    wrongupdates.Add(updates[i]);
                 }
             }
-            
-            int answer = 0;
-            foreach (Match match in test)
+
+            int totalSumInc = 0;
+
+            for (int i = 0; i < wrongupdates.Count; i++) // Every Row in updates
             {
-                // Extract the numbers from capture groups
-                int num1 = int.Parse(match.Groups[1].Value);
-                int num2 = int.Parse(match.Groups[2].Value);
+                bool areWeClear = true;
+                int maxSwaps = (wrongupdates[i].Count * (wrongupdates[i].Count - 1)) / 2;
+                // Loop swapper while bllemfemof
+                int counter = 0;
+                while (counter <= maxSwaps)
+                {
+                    wrongupdates[i] = Swapper(wrongupdates[i], rules);
 
-                // Multiply the numbers
-                int result = num1 * num2;
+                    counter++;
+                }
 
-                answer += result;
+
+                for (int j = 0; j < wrongupdates[i].Count; j++) // Every int in the row.
+                {
+                    // X | Y
+
+                    for (int k = 0; k < rules.Count; k++) // Every rule
+                    {
+                        // continue break; Rule broken
+                        // X
+                        if (rules[k][0] == wrongupdates[i][j])
+                            if (wrongupdates[i].Contains(rules[k][1])) // If the Y value exists in the row.
+                                if (updates[i].IndexOf(rules[k][0]) > wrongupdates[i].IndexOf(rules[k][1])) // is X-index > Y-index ?
+                                    areWeClear = false; // continue break; Rule broken
+                                                        // Y
+                        if (rules[k][1] == wrongupdates[i][j])
+                            if (wrongupdates[i].Contains(rules[k][0])) // If the X value exists in the row.
+                                if (wrongupdates[i].IndexOf(rules[k][1]) < wrongupdates[i].IndexOf(rules[k][0])) // is Y-index < X-index ?
+                                    areWeClear = false; // continue break; Rule broken
+
+                    }
+
+                }
+                if (areWeClear)
+                {
+                    int middlePageNumber = wrongupdates[i][(wrongupdates[i].Count - 1) / 2];
+                    totalSumInc += middlePageNumber;
+                }
 
             }
-            Console.WriteLine(answer);
-            Console.WriteLine(answerb);
-
-
-            //for (int j = 0; j < numberGroups.Length; j++)
-            //{
-            //    //bool isIncreasing = true;
-
-            //    //bool isSafe = true;
-
-            //    List<int> ints = new List<int>();
-            //    ints.AddRange(numberGroups[j]);
-
-            //    int[] nums = diffChecker(ints);
-            //    Console.WriteLine(nums[0] + " " + nums[1]);
-            //    if (nums[0] == -10 && nums[1] == -10)
-            //    {
-            //        counter++;
-            //        continue;
-            //    }
-            //    ints.RemoveAt(nums[1]);
-            //    nums = diffChecker(ints);
-            //    if (nums[0] == -10 && nums[1] == -10)
-            //    {
-            //        counter++;
-            //        continue;
-            //    }
-
-
-            //    //for (int i = 1; i < numberGroups[j].Length; i++)
-            //    //{
-
-
-            //    //    int diff = Math.Abs(numberGroups[j][i] - numberGroups[j][i - 1]);
-            //    //    if (i ==1)
-            //    //    {
-            //    //        isIncreasing = numberGroups[j][i] > numberGroups[j][i - 1];
-            //    //    }
-
-            //    //    // Rule 1: 
-            //    //    if (diff < 1 || diff > 3)
-            //    //    {
-
-
-            //    //        isSafe = false;
-            //    //        break; 
-            //    //    }
-
-            //    //    // Determine the direction
-            //    //    bool currentIsIncreasing = numberGroups[j][i] > numberGroups[j][i - 1];
-
-            //    //    // Rule 2: Check if the direction has switched
-            //    //    if (currentIsIncreasing != isIncreasing)
-            //    //    {
-
-            //    //        isSafe = false;
-
-            //    //        break;
-            //    //    }
-
-            //    //}
-            //    //if (isSafe)
-            //    //    counter++;
-            //}
-            //Console.WriteLine(counter);
-
-            // List<int> List1 = new List<int>();
-            // List<int> List2 = new List<int>();
-            // for(int i = 0; i <= numbers.Count-1; i = i+2)
-            // {
-            //     List1.Add(numbers[i]);
-            //     List2.Add(numbers[i + 1]);
-
-            // }
-
-            // List1.Sort();
-            // List2.Sort();
-            // int answera = differenceFinder(List1, List2);
-            // int answerb = DuplicateFinder(List1, List2);
-
-
-
-            //Console.WriteLine(answerb);
-
+            Console.WriteLine($"The sum for part 2 is {totalSumInc}"); // 3778
+            // TODO - Output 0
         }
     }
 }
